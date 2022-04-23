@@ -15,7 +15,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(),[
             'name'=>'required',
             'surname'=>'required',
-            'email'=>'required| |email',
+            'email'=>'required|email|unique:users',
             'password'=>'required|min:8',
         ]);
        
@@ -24,7 +24,7 @@ class AuthController extends Controller
         if($validator->fails())
         {
             return response()->json([
-                'validator_error'=>$validator->messages(),
+                'validation_error'=>$validator->messages(),
             ]);
         }
 
@@ -38,7 +38,7 @@ class AuthController extends Controller
 
 
 
-        $token=$user->createToken($user->email.'_Token')->plainTextToken;
+        $token=$user->createToken($user->email.'_Token',[""])->plainTextToken;
 
         return response()->json([
             'status'=>200,
@@ -65,7 +65,7 @@ class AuthController extends Controller
         if($validator->fails())
         {
             return response()->json([
-                'validator_error'=>$validator->messages(),
+                'validation_error'=>$validator->messages(),
             ]);
         }
 
@@ -78,14 +78,19 @@ class AuthController extends Controller
 
             if(Hash::check($request->password,$user->password)){
 
-                $token=$user->createToken($user->email.'_Token')->plainTextToken;
+
+                if($user->role_id==2)//1=user 2=admin
+                    $token=$user->createToken($user->email.'_AdminToken',["server:admin"])->plainTextToken;
+                else 
+                    $token=$user->createToken($user->email.'_Token',[""])->plainTextToken;
+
 
                 return response()->json([
                     'status'=>200,
                     'email'=>$user->email,
                     'username'=>$user->full_name,
                     'token'=>$token,
-                    'message'=>"Kayıt başarılı.",
+                    'message'=>"Giriş başarılı.",
                 ]);
 
             }

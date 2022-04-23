@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -22,12 +24,22 @@ return new class extends Migration
             $table->timestamp('last_used_at')->nullable();
             $table->timestamps();
         });
+
+        $user=User::create([
+            'role_id'=>2,
+            'name'=>'Feyyaz',
+            'surname'=>'Köse',
+            'email'=>env('DEFAULT_EMAIL'),
+            'password'=>Hash::make(env('DEFAULT_PASS')),
+        ]);
+
+        $user->createToken($user->email.'_token', ['server:admin'])->plainTextToken;
     }
 
     /**
      * Reverse the migrations.
      *
-     * @return void
+     * @return voids
      */
     public function down()
     {
