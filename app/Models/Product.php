@@ -14,9 +14,9 @@ class Product extends Model
         "title",
         "descirptions",
         "price",
-        "details",
         "quantity",
-        "features"
+        "details",
+        "path"
     ];
 
 

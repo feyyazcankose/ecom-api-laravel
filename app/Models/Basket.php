@@ -10,11 +10,11 @@ class Basket extends Model
     use HasFactory;
     protected $table="baskets";
     protected $fillable = [
-        'product_id','user_id'
+        'user_id','status'
     ];
 
 
-    public function getProduct(){
-        return $this->belongsTo(Product::class,"product_id");
-    }
+  public function getProducts(){
+      return $this->hasMany(BasketProduct::class,'basket_id');
+  }
 }

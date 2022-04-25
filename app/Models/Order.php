@@ -5,20 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+// use App\Enums\OrderEnum;
+use App\Enums\OrderEnum;
 class Order extends Model
 {
     use HasFactory;
 
     protected $table="orders";
     protected $fillable = [
-        'product_id','user_id','price'
+        'basket_id','status','adres_id'
+    ];
+    
+    protected $casts = [
+        'status'=> OrderEnum::class,
     ];
 
-    public function getUser(){
-        return $this->belongsTo(User::class,"user_id");
+    
+
+    public function getBasket(){
+        return $this->belongsTo(Basket::class,'basket_id')->where('user_id',auth()->user()->id);
     }
 
-    public function getProduct(){
-        return $this->belongsTo(Product::class,"product_id");
+    public function getAdres(){
+        return $this->belongsTo(Adres::class,"adres_id")->where('user_id',auth()->user()->id);
     }
 }

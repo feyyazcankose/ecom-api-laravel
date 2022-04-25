@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Basket;
+use App\Models\BasketProduct;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class BasketController extends Controller
 {
@@ -14,17 +17,14 @@ class BasketController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $user=auth()->user();
+        $basket= Basket::where('user_id',auth()->user()->id)->get()->each(function($basket){
+            $basket->getProducts;
+        });
+        return response()->json([
+            "status"=>200,
+            "basket"=>$basket
+        ]);
     }
 
     /**
@@ -35,51 +35,43 @@ class BasketController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),
+        [
+            'product_id'=>"required",
+        ]
+        );
+
+        if($validator->fails())
+        {
+            return response()->json([
+                'validation_error'=>$validator->messages(),
+            ]);
+        }
+
+
+        $user=auth()->user();
+        
+        $nowBasket=Basket::orderBy('created_at',"desc")->first();   
+
+        if(!isset($nowBasket->status) || $nowBasket->status) //Sepet aktif değil işleme devam edildi.
+        {
+            $nowBasket = Basket::create([
+                "user_id"=>$user->id,
+                'status'=>false
+            ]);
+        }
+
+        BasketProduct::create([
+            'basket_id'=>$nowBasket->id,
+            'product_id'=>$request->product_id,
+            'price'=>Product::find($request->product_id)->price,
+        ]);
+
+        return response()->json([
+            "messages"=>"Kayıt Başarılı",
+            "status"=>200,
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Basket  $basket
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Basket $basket)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Basket  $basket
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Basket $basket)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Basket  $basket
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Basket $basket)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Basket  $basket
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Basket $basket)
-    {
-        //
-    }
 }
+

@@ -1,7 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Customs\Upload;
+use App\Enums\UploadEnum;
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Support\Facades\Validator;
 
 use Illuminate\Http\Request;
@@ -15,12 +20,32 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products= Product::all();
+        $products= Product::all()->each(function($product){
+            $product->getCategory;
+        });
         return response()->json([
             "status"=>200,
             "products"=>$products
         ]);
     }
+
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return response()->json([
+            "status"=>200,
+            "category"=>Category::all(["id","title"])
+        ]);
+        
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -30,14 +55,14 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        
         $validator = Validator::make($request->all(),[
             'title'=> "required",
             'category_id'=>"required",
             'descirptions'=>"required",
             'price'=>"required",
-            'details'=>"required",
-            'features'=>"required",
             'quantity'=>"required",
+            'path'=>"required",
         ]);
 
 
@@ -48,16 +73,26 @@ class ProductController extends Controller
             ]);
         }
 
+        if($request->has('path')){
 
+                $upload = new Upload($request->path,"product",UploadEnum::PRODUCT);
+                $path=$upload->upload();
+               
+        }
         $product = Product::create([
             "title"=>$request->title,
             "category_id"=>$request->category_id,
             "descirptions"=>$request->descirptions,
+            "quantity"=>$request->quantity,
             'price'=>$request->price,
-            'details'=>$request->details,
-            'features'=>$request->features,
             'quantity'=>$request->quantity,
+            'path'=>$path,
         ]);
+
+        
+
+
+        
 
         return response()->json([
             "messages"=>"Kayıt Başarılı",
@@ -95,14 +130,12 @@ class ProductController extends Controller
     {
 
         // dd($request);
-
+       
         $validator = Validator::make($request->all(),[
             'title'=> "required",
             'category_id'=>"required",
             'descirptions'=>"required",
             'price'=>"required",
-            'details'=>"required",
-            'features'=>"required",
             'quantity'=>"required",
         ]);
 
@@ -114,13 +147,12 @@ class ProductController extends Controller
             ]);
         }
 
+
         $product = Product::find($id)->update([
             "title"=>$request->title,
             "category_id"=>$request->category_id,
             "descirptions"=>$request->descirptions,
             'price'=>$request->price,
-            'details'=>$request->details,
-            'features'=>$request->features,
             'quantity'=>$request->quantity,
         ]);
 
@@ -144,4 +176,5 @@ class ProductController extends Controller
         ]);
         
     }
+    
 }

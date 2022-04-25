@@ -4,7 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\Role;
 return new class extends Migration
 {
     /**
@@ -14,20 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('baskets', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->unsignedBigInteger("user_id");
+            $table->boolean('status')->default(false);
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users');
+
         });
-
-        Role::create([
-            "title"=>"user"
-        ]);
-
-        Role::create([
-            "title"=>"admin"
-        ]);
-
     }
 
     /**
@@ -37,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('baskets');
     }
 };

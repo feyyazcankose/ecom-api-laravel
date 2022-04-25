@@ -1,9 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Customs\Table;
+use App\Customs\Upload;
+use App\Enums\UploadEnum;
 use App\Models\Category;
 use Illuminate\Support\Facades\Validator;
-
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -15,10 +18,11 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $category= Category::all();
+        $category = Category::all()->toArray();
+
         return response()->json([
             "status"=>200,
-            "category"=>$category
+            "category"=>$category,
         ]);
     }
 
@@ -30,13 +34,14 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+
         $validator = Validator::make($request->all(),[
             'title'=> "required",
             'slug'=>"required",
-            'banner'=>"required"
+            'banner'=>"required|image|mimes:jpeg,png,jpg"
         ]);
 
-
+       
         if($validator->fails())
         {
             return response()->json([
@@ -44,12 +49,27 @@ class CategoryController extends Controller
             ]);
         }
 
+        
+        if($request->has('banner'))
+        {
+            $upload = new Upload($request->banner,"baner",UploadEnum::BANNER);
+            $url=$upload->upload();
+            
+        }
+        else
+        {
+            return response()->json([
+                "messages"=>"Resim Seçilmedi!",
+                "status"=>200
+            ]);
+        }
 
         $category = Category::create([
             "title"=>$request->title,
             "slug"=>$request->slug,
-            'banner'=>$request->banner
+            'banner'=>$url
         ]);
+
 
         return response()->json([
             "messages"=>"Kayıt Başarılı",
@@ -91,7 +111,6 @@ class CategoryController extends Controller
         $validator = Validator::make($request->all(),[
             'title'=> "required",
             'slug'=>"required",
-            'banner'=>"required"
         ]);
 
 
@@ -105,7 +124,6 @@ class CategoryController extends Controller
         $category = Category::find($id)->update([
             "title"=>$request->title,
             "slug"=>$request->slug,
-            'banner'=>$request->banner
         ]);
 
         return response()->json([

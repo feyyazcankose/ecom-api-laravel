@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -26,7 +27,7 @@ return new class extends Migration
         });
 
         $user=User::create([
-            'role_id'=>2,
+            'role_id'=>RoleEnum::ADMIN,
             'name'=>'Feyyaz',
             'surname'=>'Köse',
             'email'=>env('DEFAULT_EMAIL'),

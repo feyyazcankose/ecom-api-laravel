@@ -20,8 +20,7 @@ return new class extends Migration
             $table->text('descirptions');
             $table->integer('price')->default(0);
             $table->integer('quantity')->default(0);
-            $table->text('details')->nullable();
-            $table->text('features')->nullable();
+            $table->text('path')->default("upload/product/default.jpg");
             $table->timestamps();
 
 

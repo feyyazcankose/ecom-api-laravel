@@ -13,16 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('baskets', function (Blueprint $table) {
+        Schema::create('basket_products', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger("basket_id");
             $table->unsignedBigInteger("product_id");
-            $table->unsignedBigInteger("user_id");
+            $table->integer("price");
+   
+
             $table->timestamps();
 
             //Forign Key
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('basket_id')->references('id')->on('baskets');
             $table->foreign('product_id')->references('id')->on('products');
-
         });
     }
 
@@ -33,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('baskets');
+        Schema::dropIfExists('basket_products');
     }
 };

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Adres;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class AdressController extends Controller
 {
@@ -14,17 +15,12 @@ class AdressController extends Controller
      */
     public function index()
     {
-        //
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $adres= Adres::where('user_id',auth()->user()->id)->get();
+        return response()->json([
+            "status"=>200,
+            "adres"=>$adres
+        ]);
     }
 
     /**
@@ -34,52 +30,102 @@ class AdressController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        //
+    {   
+
+
+        $validator = Validator::make($request->all(),[
+            'adres'=> "required",
+            'title'=> "required"
+        ]);
+
+
+        if($validator->fails())
+        {
+            return response()->json([
+                'validation_error'=>$validator->messages(),
+            ]);
+        }
+
+        $user=auth()->user();
+
+        $request->request->add(["user_id"=>$user->id]);
+
+        $adres = Adres::create($request->all());
+
+        return response()->json([
+            "messages"=>"Kayıt Başarılı",
+            "status"=>200,
+            "adres"=>$adres
+        ]);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\adres  $adres
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Adres $adres)
+    public function show($id)
     {
-        //
+        // dd($id);
+        $adres = Adres::find($id);
+
+        return response()->json([
+            "status"=>200,
+            "adres"=>$adres,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\adres  $adres
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Adres $adres)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\adres  $adres
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Adres $adres)
+    public function update(Request $request, $id)
     {
-        //
+
+        // dd($request);
+
+        $validator = Validator::make($request->all(),[
+            'adres'=> "required",
+            'title'=> "required"
+        ]);
+
+
+        if($validator->fails())
+        {
+            return response()->json([
+                'validation_error'=>$validator->messages(),
+            ]);
+        }
+
+        $user=auth()->user();
+
+        $request->request->add(["user_id"=>$user->id]);
+
+        $adres = Adres::find($id)->update($request->all());
+
+        return response()->json([
+            "status"=>200,
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\adres  $adres
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(adres $adres)
+    public function destroy( $id)
     {
-        //
+        $adres = Adres::find($id)->delete();
+        $status= $adres ? 200 : 401;
+        return response()->json([
+            "status"=>$status,
+        ]);
+        
     }
 }

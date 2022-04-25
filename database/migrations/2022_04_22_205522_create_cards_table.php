@@ -17,9 +17,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger("user_id");
             $table->string('title');
-            $table->date('valid_date');
-            $table->string('card_number',16);
 
+            $table->integer('mounth');
+            $table->integer('year');
+
+            $table->string('card_number',16);
             $table->string('cvc',3);
             $table->timestamps();
 

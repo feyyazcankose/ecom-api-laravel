@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Card;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CardController extends Controller
 {
@@ -14,18 +15,27 @@ class CardController extends Controller
      */
     public function index()
     {
-        //
+        $card= Card::where("user_id",auth()->user()->id)->get();
+        return response()->json([
+            "status"=>200,
+            "card"=>$card
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Store a newly created resource in storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            
+            'title'=> "required",
+            'mounth'=>"required",
+            'year'=>"required",
+            'card_number'=>"required|min:16|max:16",
+            'cvc'=>"required|min:3|max:3"
         ]);
 
 
@@ -36,66 +46,67 @@ class CardController extends Controller
             ]);
         }
 
+        $request->request->add(["user_id"=>auth()->user()->id]);
+        // dd($request);
+        $card = Card::create($request->all()); 
 
-        $user = Category::create([
-            
+        return response()->json([
+            "messages"=>"Kayıt Başarılı",
+            "status"=>200,
+            "card"=>$card
         ]);
-    }
-
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Card  $card
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Card $card)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Card  $card
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Card $card)
-    {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Card  $card
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Card $card)
+    public function update(Request $request, $id)
     {
-        //
+
+        // dd($request);
+
+        $validator = Validator::make($request->all(),[
+            'title'=> "required",
+            'mounth'=>"required",
+            'year'=>"required",
+            'card_number'=>"required|min:16|max:16",
+            'cvc'=>"required|min:3|max:3"
+        ]);
+
+
+        if($validator->fails())
+        {
+            return response()->json([
+                'validation_error'=>$validator->messages(),
+            ]);
+        }
+
+        $request->request->add(["user_id"=>auth()->user()->id]);
+        // dd($request);
+        $card = Card::where("id",$id)->update($request->all()); 
+
+        return response()->json([
+            "status"=>200,
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Card  $card
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Card $card)
+    public function destroy( $id)
     {
-        //
+        $card = Card::find($id)->delete();
+        $status= $card ? 200 : 401;
+        return response()->json([
+            "status"=>$status,
+        ]);
+        
     }
 }

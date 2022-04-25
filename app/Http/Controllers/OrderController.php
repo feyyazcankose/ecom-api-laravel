@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Basket;
 
 class OrderController extends Controller
 {
@@ -16,7 +17,10 @@ class OrderController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $orders= Order::where('user_id',$user->id);
+        $orders= Order::all()->each(function ($order){
+            $order->getBasket->getProducts;
+            $order->getAdres;
+        });
         return response()->json([
             "status"=>200,
             "orders"=>$orders
@@ -33,10 +37,12 @@ class OrderController extends Controller
     {
         $user = auth()->user();
 
-        $validator = Validator::make($request->all(),[
-            'product_id'=>"required",
+        $validator = Validator::make($request->all(),
+        [
+            'adres_id'=>"required",
         ]);
 
+        $nowBasket=Basket::orderBy('created_at',"desc")->first();
 
         if($validator->fails())
         {
@@ -46,9 +52,17 @@ class OrderController extends Controller
         }
 
 
-        $order = Order::create([
-            "product_id"=>$request->product_id,
-            'user_id'=>$user->id
+        $order = Order::create(
+            [
+                "basket_id"=>$nowBasket->id,
+                "adres_id"=>$request->adres_id,
+                'user_id'=>$user->id,
+                'status'=> \App\Enums\OrderEnum::WAIT,
+            ]
+        );
+
+        Basket::find($nowBasket->id)->update([
+            'status'=>true
         ]);
 
         return response()->json([
@@ -58,39 +72,12 @@ class OrderController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        // dd($id);
-        $order = Order::find($id);
-
-        return response()->json([
-            "status"=>200,
-            "order"=>$order,
-        ]);
-    }
+  
 
 
 
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy( $id)
-    {
-        $order = Order::find($id)->delete();
-        $status= $order ? 200 : 401;
-        return response()->json([
-            "status"=>$status,
-        ]);
-        
-    }
+
+
+    
 }

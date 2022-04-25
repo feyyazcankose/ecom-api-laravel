@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -79,7 +80,7 @@ class AuthController extends Controller
             if(Hash::check($request->password,$user->password)){
 
 
-                if($user->role_id==2)//1=user 2=admin
+                if($user->role_id==RoleEnum::ADMIN)//1=user 2=admin
                     $token=$user->createToken($user->email.'_AdminToken',["server:admin"])->plainTextToken;
                 else 
                     $token=$user->createToken($user->email.'_Token',[""])->plainTextToken;
